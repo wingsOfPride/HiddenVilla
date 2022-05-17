@@ -1,0 +1,40 @@
+﻿@page "/ParentComponent"
+
+
+<h3 class="text-danger">Parent Child Component</h3>
+
+<CascadingValue Value="@MessageForGrandChild">
+    <ChildComponent @ref="childComp" OnClickBtnMethod="ShowMessage" Title="This title is passed as parameter from Parent Component" MessageForGrandChild="This is from Parent Child">
+        <ChildContent> Render Fragment From Fragment Wohoo</ChildContent>
+
+        <DangerChildContent>Hahahaha</DangerChildContent>
+    </ChildComponent>
+</CascadingValue>
+
+<AnotherChildComponent InputAttributes="InputAttributesFromParent"></AnotherChildComponent>
+<p>@messageText</p>
+
+
+<div class="row">
+    <button class="btn btn-success" @onclick="() => childComp.ShowToastrSuccess()">Show Alert</button>
+</div>
+
+@code {
+    private ChildComponent childComp;
+
+    private string MessageForGrandChild = "This is from Parent";
+
+    public Dictionary<string, object> InputAttributesFromParent { get; set; } = new Dictionary<string, object>()
+    {
+        {"required", "required"},
+        {"placeholder", "Enter the Room Name from Parent"},
+        {"maxlength", 5}
+
+    };
+
+    private string messageText = "";
+    private void ShowMessage(MouseEventArgs e)
+    {
+        messageText = "Blazzing text from parent";
+    }
+}

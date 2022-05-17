@@ -1,0 +1,54 @@
+﻿@page "/blazorjs"
+@inject IJSRuntime JsRuntime
+<h3>BlazorJS</h3>
+
+<div class="row">
+    <button class="btn btn-primary" @onclick="(() => TestConfirmBox(ConfirmMessage))">Test Confirm Button</button>
+</div>
+<div class="row">
+    <button class="btn btn-success" @onclick="TestSuccess">Test Confirm Button</button>
+    <button class="btn btn-danger" @onclick="TestDanger">Test Confirm Button</button>
+</div>
+<div class="row">
+    <button class="btn btn-success" @onclick="(() => TestSuccessAlert(ConfirmMessage))">Test Confirm Button</button>
+    <button class="btn btn-danger" @onclick="(() => TestDangerAlert(ConfirmMessage))">Test Confirm Button</button>
+</div>
+<div class="row">
+    @if (ConfirmResult)
+    {
+        <p>Confirmation has been made!</p>
+    }
+    else
+    {
+        <p>Confirmation Pending</p>
+
+    }
+</div>
+
+@code {
+    private string ConfirmMessage = "Are you sure you want to click";
+    private bool ConfirmResult { get; set; }
+
+    private async Task TestConfirmBox(string message)
+    {
+        ConfirmResult = await JsRuntime.InvokeAsync<bool>("confirm", ConfirmMessage);
+    }
+
+    private async Task TestSuccess()
+    {
+        await JsRuntime.ToastrSuccess(ConfirmMessage);
+    }
+    private async Task TestDanger()
+    {
+        await JsRuntime.ToastrError(ConfirmMessage);
+    }
+
+    private async Task TestSuccessAlert(string message)
+    {
+        await JsRuntime.SweetAlertSuccess(message);
+    }
+    private async Task TestDangerAlert(string message)
+    {
+        await JsRuntime.SweetAlertError(message);
+    }
+}

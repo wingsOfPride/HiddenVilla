@@ -1,0 +1,116 @@
+﻿@page "/hotel-amenity/create"
+@page "/hotel-amenity/update/{Id:int}"
+
+@using Models
+@using Business.Repository.IRepository
+@using HiddenVilla_Server.Service.IService
+@inject IHotelAmenityRepository HotelAmenityRepository
+@inject NavigationManager NavigationManager
+@inject IJSRuntime IJSRuntime
+@attribute [Authorize(Roles = Common.SD.Role_Admin)]
+<div class="row mt-2 mb-5">
+    <h3 class="card-title text-info mb-3 ml-3">
+        @Title Hotel Room
+    </h3>
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <EditForm Model="HotelAmenity" OnValidSubmit="HandleHotelAmentySubmit">
+                    <DataAnnotationsValidator></DataAnnotationsValidator>
+                    <ValidationSummary />
+                    <div class="form-group">
+                        <label>Name</label>
+                        <InputText @bind-Value="HotelAmenity.Name" class="form-control"></InputText>
+                        <ValidationMessage For="() => HotelAmenity.Name"></ValidationMessage>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                       <InputTextArea @bind-Value="HotelAmenity.Description" class="form-control"></InputTextArea>
+                        <ValidationMessage For="() => HotelAmenity.Description"></ValidationMessage>
+                    </div>
+                    <div class="form-group">
+                        <label>Timing</label>
+                      <InputText @bind-Value="HotelAmenity.Timing" class="form-control"></InputText>
+                        <ValidationMessage For="() => HotelAmenity.Timing"></ValidationMessage>
+                    </div>
+                    <div class="form-group">
+                             <label>Icon Style</label>
+                        <InputText @bind-Value="HotelAmenity.IconStyle" class="form-control"></InputText>
+                        <ValidationMessage For="() => HotelAmenity.IconStyle"></ValidationMessage>
+                    </div>
+              
+                    <div class="form-group">
+                        <button class="btn btn-primary">@Title Room</button>
+                        <NavLink href="hotel-room" class="btn btn-secondary">Back to Index</NavLink>
+                    </div>
+                </EditForm>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@code {
+
+
+    [Parameter]
+    public int? Id { get; set; }
+    public string Title { get; set; } = "Create";
+
+    public HotelAmenityDTO HotelAmenity { get; set; } = new HotelAmenityDTO();
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+      
+        if(Id != null)
+        {
+            Title = "Update";
+            HotelAmenity = await HotelAmenityRepository.GetAmenity(Id.Value);
+        }
+        else
+        {
+            //create
+            Title = "Create";
+            HotelAmenity = new HotelAmenityDTO();
+        }
+    }
+
+    private async Task HandleHotelAmentySubmit()
+    {
+          try
+        {
+            var amenityDetail = await HotelAmenityRepository.IsRoomUnique(HotelAmenity.Name, HotelAmenity.Id);
+            if (amenityDetail != null)
+            {
+                await IJSRuntime.ToastrError("Room name already exists.");
+                return;
+            }
+
+            if (HotelAmenity.Id != 0 && Title == "Update")
+            {
+                //update
+                var updateAmenity = await HotelAmenityRepository.UpdateAmenity(HotelAmenity.Id, HotelAmenity);
+                await IJSRuntime.ToastrSuccess("Amenity Updated Successfully");
+
+            }
+            else
+            {
+                //create
+ 
+                var createdResult = await HotelAmenityRepository.CreateAmenity(HotelAmenity);
+           
+                await IJSRuntime.ToastrSuccess("Amenity Created Successfully");
+
+            }
+        }
+        catch (Exception ex)
+        {
+            await IJSRuntime.ToastrError(ex.Message);
+            return;
+        }
+        NavigationManager.NavigateTo("hotel-amenity");
+    }
+}
